@@ -1,6 +1,9 @@
 ARG NGINX_VERSION
 FROM nginx:${NGINX_VERSION}
 
+RUN mkdir -p /var/run \
+    && chown -R nginx:nginx /var/run
+    
 # Устанавливаем curl для healthcheck (один пакет, без лишнего мусора) 
 RUN apk add --no-cache curl
 
