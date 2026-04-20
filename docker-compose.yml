@@ -26,8 +26,6 @@ services:
       resources:
         limits:
           memory: ${BACKEND_MEMORY_LIMIT}
-        reservations:
-          memory: 64M
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/nginx-python-health')"]
       interval: 10s
