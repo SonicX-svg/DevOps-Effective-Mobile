@@ -29,7 +29,7 @@
 | Docker Compose | 2.0+ | Оркестрация многоконтейнерных приложений |
 | Nginx | 1.26-alpine | Reverse proxy |
 | Python | 3.12-slim | Backend сервер |
-| curl | latest | Healthcheck для nginx |
+| curl | latest (последнюяя стабильная версия из репозитория Alpine) | Healthcheck для nginx |
 
 ## 📁 Структура проекта
 ```
