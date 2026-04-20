@@ -1,0 +1,63 @@
+version: '3.8'
+
+# Определяем отдельную сеть
+networks:
+  app-network:
+    name: ${APP_NAME}_network
+    driver: bridge
+
+services:
+  # Бэкенд на Python
+  backend:
+    build: 
+      context: ./backend
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION}
+    container_name: ${APP_NAME}_backend
+    working_dir: /app
+    expose:
+      - "${BACKEND_PORT}" 
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - APP_NAME=${APP_NAME}
+      - BACKEND_PORT=${BACKEND_PORT}
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: ${BACKEND_MEMORY_LIMIT}
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/nginx-python-health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Nginx — прокси на бэкенд
+  nginx:
+    build:
+      context: ./nginx
+      args:
+        NGINX_VERSION: ${NGINX_VERSION}
+    container_name: ${APP_NAME}_nginx
+    working_dir: /etc/nginx
+    ports:
+      - "${NGINX_HOST_PORT}:${NGINX_PORT}"  # Хост:Контейнер
+    restart: unless-stopped
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: ${NGINX_MEMORY_LIMIT}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${NGINX_PORT}/nginx-health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    depends_on:
+      backend:
+        condition: service_healthy
